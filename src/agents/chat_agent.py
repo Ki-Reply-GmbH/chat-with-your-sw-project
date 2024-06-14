@@ -1,5 +1,5 @@
-from config import PromptConfig
-from models import LLModel
+from src.config import PromptConfig
+from src.models import LLModel
 
 class ChatAgent:
     pass

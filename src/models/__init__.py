@@ -11,9 +11,9 @@ import logging
 
 import openai
 
-from config import Config
-from utils.cache import Cache
-from utils.functions import decode_from_base64, encode_to_base64
+from src.config import Config
+from src.utils.cache import Cache
+from src.utils.functions import decode_from_base64, encode_to_base64
 
 LOGGER = logging.getLogger(__name__)
 
