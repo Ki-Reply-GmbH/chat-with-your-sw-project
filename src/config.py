@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 LOGGER = logging.getLogger(__name__)
-logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
+logging.basicConfig(level=os.environ.get("LOG_LEVEL", "DEBUG"))
 
 
 @dataclass
@@ -31,58 +31,43 @@ class PromptConfig:
         commit_prompt (str): The prompt used for committing.
     """
     def __init__(self):
-        self.log_prompt = log_prompt
-        self.repair_prompt = repair_prompt
-        self.commit_prompt = commit_prompt
+        pass
 
-log_prompt = """
-You will receive the log of a failed CI/CD pipeline. The log contains \
-unnecessary information. You'll be given a workflow to follow along with some \
-examples:
-1. Search for the relevant information that describes the cause of the error.
-2. Identify the file in which the error is caused and which need to be \
-corrected.
-3. Return a Json file with the keys "explanation", "error_area" and "file".
-The cause of the error (str), as described in 1., should be in "Explanation".
-The lines of code that are causing the error (str), should be in "error_area".
-The file (str) that caused the error should be in "file".
+    def _read_file_content(self, file_path: str) -> str:
+        with open(file_path, "r") as file:
+            return file.read()
 
-Log:
-{log}
-"""
+    def get_document_class_prompt(self) -> str:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        prompt_path = os.path.join(
+            base_dir, "prompts",
+            "document_class_prompt.txt"
+            )
+        return self._read_file_content(prompt_path)
 
-repair_prompt = """\
-You will receive the complete source code of a file that has errors. In a \
-previous LLM call, the cause of the error was analyzed and the area of the \
-error was narrowed down. You will receive all this information separated from \
-each other with ####. Correct the source code using the additional information.\
-Return only the source code and no other information. Do not use formatting \
-characters in your answer. Your answer should be written directly to a file \
-and consist exclusively of interpretable or compilable source code.
+    def get_document_method_prompt(self) -> str:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        prompt_path = os.path.join(
+            base_dir, "prompts",
+            "document_method_prompt.txt"
+            )
+        return self._read_file_content(prompt_path)
 
-####
-Explanation:
-{explanation}
-####
-Error Area:
-{error_area}
-####
-Source Code:
-{source_code}
-####
-"""
+    def get_exract_methods_prompt(self) -> str:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        prompt_path = os.path.join(
+            base_dir, "prompts",
+            "extract_methods_prompt.txt"
+            )
+        return self._read_file_content(prompt_path)
 
-commit_prompt = """\
-You will receive relevant information about the error. The error description \
-and the source code that triggered the error. The error was already corrected \
-in a previous LLM call. Compose a GitHub commit message based on this \
-information.
-Do not use formatting characters in your answer. Your answer should be used \
-directly as a GitHub commit message without any further formatting.
-
-Relevant information:
-{information}
-"""
+    def get_exract_classes_prompt(self) -> str:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        prompt_path = os.path.join(
+            base_dir, "prompts",
+            "extract_classes_prompt.txt"
+            )
+        return self._read_file_content(prompt_path)
 
 
 @dataclass
@@ -113,25 +98,17 @@ class Config:
         ####################
         # Cache CONFIG
         ####################
-        self.USE_CACHE = self._read_bool_value("USE_CACHE", "False")
+        self.USE_CACHE = self._read_bool_value("USE_CACHE", "True")
 
         ####################
         # AGI CONFIG
         ####################
         self.prompts = PromptConfig()
         self.AGI_VERBOSE = True
-        self.LLM_MODEL_NAME = os.environ.get("LLM_MODEL_NAME", "gpt-4-1106-preview")
+        self.LLM_MODEL_NAME = os.environ.get("LLM_MODEL_NAME", "gpt-4-turbo")
         self.LLM_TEMPERATURE = os.environ.get("LLM_TEMPERATURE", 0.0)
-        self.LLM_MAX_LENGTH = os.environ.get("LLM_MAX_LENGTH", 512)
-
-        #######################
-        # AZURE OPENAI CONFIG
-        #######################
-        self.OPENAI_API_BASE = os.environ.get("OPENAI_API_BASE")
-        self.OPENAI_DEPLOYMENT_NAME = os.environ.get("OPENAI_DEPLOYMENT_NAME")
+        self.LLM_MAX_LENGTH = os.environ.get("LLM_MAX_LENGTH", 4096)
         self.OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-        self.OPENAI_API_VERSION = os.environ.get("OPENAI_API_VERSION", "2023-05-15")
-        self.OPENAI_API_TYPE = os.environ.get("OPENAI_API_TYPE", "azure")
 
         ####################
         # WORKING DIR CONFIG
@@ -153,7 +130,7 @@ class Config:
         Returns:
             bool: The boolean value.
         """
-        env_value: str | bool = os.environ.get(env_name, default_value)
+        env_value = os.environ.get(env_name, default_value)
         if env_value is None:
             return default_value
 
