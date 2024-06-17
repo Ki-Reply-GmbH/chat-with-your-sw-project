@@ -1,26 +1,33 @@
 import sys
 import io
 import json
+import os
 from src.utils.git_handler import GitHandler
 from src.utils.cache import DisabledCache, SimpleCache
-from src.utils.file_retriever import FileRetriever
+from src.utils.directory_loader import DirectoryLoader
 from src.agents.docstring_agent import DocstringAgent
 from src.agents.chat_agent import ChatAgent
 from src.config import load_config
 from src.models import LLModel
 
 def main():
-    pass
-
-if __name__ == "__main__":
     # Allow prinint utf-8 characters in console
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf8')
 
     config = load_config()
     cache = SimpleCache(tmp_path="./.tmp")
 
-    py_filepaths = FileRetriever("resources/code").file_mapping["py"]
-    print(py_filepaths)
+    dir_loader = DirectoryLoader(directory="./resources/cookiecutter")
+    # Ermitteln des absoluten Pfads
+    absolute_path = os.path.abspath(dir_loader.directory)
+    print("Absoluter Pfad:", absolute_path)
+    documents = dir_loader.load()
+
+    print("Loaded files in total: ", len(documents))
+    print("File paths:")
+    for document in documents:
+        print(document.metadata["source"])
+
     
     """
     docstr_agent = DocstringAgent(
@@ -38,3 +45,6 @@ if __name__ == "__main__":
     with open('responses.json', 'w') as f:
         json.dump(docstr_agent.responses, f, indent=4)
     """
+
+if __name__ == "__main__":
+    main()

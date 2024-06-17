@@ -1,5 +1,5 @@
 import os
-from langchain.document_loaders import PythonLoader, UnstructuredRSTLoader, UnstructuredMarkdownLoader, TextLoader
+from langchain_community.document_loaders import PythonLoader, UnstructuredRSTLoader, UnstructuredMarkdownLoader, TextLoader
 from typing import Type
 from pathlib import Path
 
