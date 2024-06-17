@@ -1,3 +1,4 @@
+Human:
 You are provided with source code and your task is to extract all the methods \
 or functions from the code.
 Respond with all the method or function names extracted from the code. Delimit \
@@ -11,3 +12,5 @@ list.
 ####
 {source_code}
 ####
+
+AI:

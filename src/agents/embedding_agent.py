@@ -4,27 +4,43 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from transformers import AutoTokenizer, AutoModel
 
 class EmbeddingAgent:
-    def __init__(self, documents: list):
+    def __init__(self, documents: list, use_full_text: bool = False):
         self.documents = documents
-        self.chunks = []
+        if use_full_text:
+            self.chunks = self.use_full_text()
+        else:
+            self.chunks = self.split_text()
         self.document_embeddings = {}
+
+    def use_full_text(self) -> list:
+        chunks = []
+        for doc in self.documents:
+            chunks.append(
+                {
+                    "document_id": doc.metadata["source"],
+                    "document_name": os.path.basename(doc.metadata["source"]),
+                    "text": doc.page_content  # Verwende den gesamten Inhalt des Dokuments
+                }
+            )
+        return chunks
 
     def split_text(self) -> list:
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=500,
             chunk_overlap=100
         )
+        chunks = []
         for doc in self.documents:
             doc_chunks = splitter.split_text(doc.page_content)
             for chunk in doc_chunks:
-                self.chunks.append(
+                chunks.append(
                     {
                         "document_id": doc.metadata["source"],
                         "document_name": os.path.basename(doc.metadata["source"]),
                         "text": chunk
                     }
                 )
-        return self.chunks
+        return chunks
     
     def embed_text(
             self,

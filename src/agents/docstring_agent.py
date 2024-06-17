@@ -17,15 +17,36 @@ class DocstringAgent:
         self._prompts = prompts
         self._model = model
         self.responses = {} # Datenstruktur mit allen Klassen- und Methodendokumentationen
+        self.module_responses = {} # Datenstruktur mit allen Moduldokumentationen
+
+    def make_module_descriptions(self):
+        for file_path in self.file_paths:
+            with open(file_path, "r", encoding="utf-8") as file:
+                code = file.read()
+            if code.strip():
+                prompt = self._prompts.get_document_module_prompt()
+                self.module_responses[file_path] = self._model._get_llm_completion(
+                    prompt.format(
+                        source_code=code
+                        )
+                    )
+            else:
+                self.module_responses[file_path] = "This file is empty."
     
     def make_docstrings(self):
         for file_path in self.file_paths:
             class_names = self._extract_classes(file_path)
+            print("File path: ", file_path)
+            print("Class names: ", class_names)
+            print()
+            if "EMPTY" in class_names:
+                class_names = []
             self._document_methods(file_path, class_names)
 
             if class_names:
                 for class_name in class_names:
                     self._document_class(file_path, class_name)
+            
     
     def _document_methods(self, file_path, class_names):
         self.responses[file_path] = []
@@ -48,7 +69,7 @@ class DocstringAgent:
         prompt = self._prompts.get_document_method_prompt()
         with open(file_path, "r", encoding="utf-8") as file:
             code = file.read()
-        return self._model.get_completion(
+        return self._model._get_llm_completion(
             prompt.format(
                 source_code=code,
                 method_name=method_name
@@ -64,7 +85,7 @@ class DocstringAgent:
             if class_name in self.responses[file_path][i]:
                 index = i
                 break
-        response = self._model.get_completion(
+        response = self._model._get_llm_completion(
             prompt.format(
                 class_name=class_name,
                 class_dict=self.responses[file_path][index][class_name]
@@ -84,7 +105,7 @@ class DocstringAgent:
             return []
         
         return self._clean_list(
-            self._model.get_completion(
+            self._model._get_llm_completion(
                 prompt.format(
                     source_code=code
                     )
@@ -96,7 +117,7 @@ class DocstringAgent:
         with open(file_path, "r", encoding="utf-8") as file:
             code = file.read()
         return self._clean_list(
-            self._model.get_completion(
+            self._model._get_llm_completion(
                 prompt.format(
                     source_code=code,
                     class_name=class_name

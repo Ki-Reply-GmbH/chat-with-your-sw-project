@@ -37,6 +37,14 @@ class PromptConfig:
         with open(file_path, "r") as file:
             return file.read()
 
+    def get_document_module_prompt(self) -> str:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        prompt_path = os.path.join(
+            base_dir, "prompts",
+            "document_module_prompt.txt"
+            )
+        return self._read_file_content(prompt_path)
+
     def get_document_class_prompt(self) -> str:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         prompt_path = os.path.join(
@@ -105,7 +113,7 @@ class Config:
         ####################
         self.prompts = PromptConfig()
         self.AGI_VERBOSE = True
-        self.LLM_MODEL_NAME = os.environ.get("LLM_MODEL_NAME", "gpt-4-turbo")
+        self.LLM_MODEL_NAME = os.environ.get("LLM_MODEL_NAME", "gpt-4o")
         self.LLM_TEMPERATURE = os.environ.get("LLM_TEMPERATURE", 0.0)
         self.LLM_MAX_LENGTH = os.environ.get("LLM_MAX_LENGTH", 4096)
         self.OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
