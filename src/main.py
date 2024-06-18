@@ -12,6 +12,8 @@ from src.agents.chat_agent import ChatAgent
 from src.agents.embedding_agent import EmbeddingAgent
 from src.config import load_config
 from src.models import LLModel
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 
 def main():
     # Allow prinint utf-8 characters in console
@@ -109,10 +111,48 @@ def main_embedding():
     with open("embeddings.json", "w", encoding="utf-8") as f:
         json.dump(emb_agent.document_embeddings, f, ensure_ascii=False, indent=4)
 
-def main_db():
-    mongo_db = MongoDBAtlasVectorDB()
-    mongo_db.connect()
+    """ Create DB connection and insert the document embeddings """
+    uri = "mongodb+srv://tkubera:UBWiWVbOrWHgxcAL@cluster0.jteqk2p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    client = MongoClient(uri, server_api=ServerApi('1'))
+    db = client["embeddings"]
+    collection = db["document_embeddings"]
+
+    embeddings = json.loads(open("embeddings.json").read())
+
+    # Daten in die Collection einfügen
+    try:
+        for key in embeddings.keys():
+            collection.insert_one(embeddings[key])
+        print("Embeddings erfolgreich in die Datenbank eingefügt.")
+    except Exception as e:
+        print(f"Fehler beim Einfügen der Embeddings: {e}")
+
     
+    # Embedding vom User Query berechnen.
+    i = 0
+    while True:
+        user_input = input("Geben Sie einen Text ein (oder 'x' zum Beenden): ")
+        if user_input.lower() == "x":
+            break
+
+        # Einzelnes Dokument für die Benutzereingabe erstellen
+        user_document = {
+            "document_id": "user_input_" + str(i),
+            "document_name": "user_input_" + str(i),
+            "text": user_input
+        }
+        i += 1
+
+        # Das Embedding für die Benutzereingabe berechnen
+        emb_agent.documents = [user_document]  # Setzt die Dokumente des EmbeddingAgent auf die Benutzereingabe
+        emb_agent.make_embeddings()
+
+        # Das berechnete Embedding ausgeben
+        print("Embedding für die Benutzereingabe:")
+        print(emb_agent.document_embeddings)
+
+        # Hier können Sie das Embedding mit den anderen Embeddings vergleichen
+        # Vergleichslogik hier einfügen
 
 if __name__ == "__main__":
     main_embedding()

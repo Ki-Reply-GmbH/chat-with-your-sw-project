@@ -4,8 +4,16 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from transformers import AutoTokenizer, AutoModel
 
 class EmbeddingAgent:
-    def __init__(self, documents: list, use_full_text: bool = False):
+    def __init__(
+            self,
+            documents: list,
+            use_full_text: bool = False,
+            model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
+            ):
         self.documents = documents
+        self.model_name = model_name
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModel.from_pretrained(model_name)
         if use_full_text:
             self.chunks = self.use_full_text()
         else:
@@ -42,16 +50,11 @@ class EmbeddingAgent:
                 )
         return chunks
     
-    def embed_text(
-            self,
-            text,
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
-            ):
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModel.from_pretrained(model_name)
-        inputs = tokenizer(text, return_tensors='pt', padding=True, truncation=True, max_length=512)
+    def embed_text(self,text: str):
+        preprocessed_text = self._remove_unknown_words(text)
+        inputs = self.tokenizer(preprocessed_text, return_tensors="pt", padding=True, truncation=True, max_length=512)
         with torch.no_grad():
-            outputs = model(**inputs)
+            outputs = self.model(**inputs)
         embeddings = outputs.last_hidden_state.mean(dim=1)  # average pooling over tokens
         return embeddings
 
@@ -69,3 +72,12 @@ class EmbeddingAgent:
                 }
             self.document_embeddings[chunk["document_id"]]["embeddings"].append(embedding_list)
 
+
+    def _remove_unknown_words(self, text):
+        """
+        Entfernt unbekannte Wörter aus dem Text basierend auf dem Vokabular des Tokenizers.
+        """
+        known_vocabulary = self.tokenizer.get_vocab()
+        tokens = text.split() 
+        filtered_tokens = [token for token in tokens if token in known_vocabulary]
+        return "" "".join(filtered_tokens)
