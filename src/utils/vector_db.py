@@ -37,33 +37,23 @@ class MongoDBAtlasVectorDB(VectorDB):
         self.database = self.db_client[self.database_name]
         self.collection = self.database[self.collection_name]
 
-    def insert_vector(self, vector, metadata):
-        document = {"vector": vector, "metadata": metadata}
+    def insert_document(self, document):
         result = self.collection.insert_one(document)
         return result.inserted_id
 
     def find_similar_vectors(self, vector, k=5):
         pipeline = [
             {
-                "$search": {
-                    "index": "vectorIndex",  # Der Name Ihres Vektorindexes
-                    "compound": {
-                        "should": [
-                            {
-                                "vector": {
-                                    "path": "embeddings",  # Der Pfad zum Vektorfeld in Ihren Dokumenten
-                                    "query": vector,  # Der Vektor, zu dem die Ähnlichkeit berechnet werden soll
-                                    "cosineSimilarityField": "score"  # Feld, in dem die Ähnlichkeitsbewertung gespeichert wird
-                                }
-                            }
-                        ]
-                    }
+                "$vectorSearch": {
+                    "index": "vector_index",  # Name des Suchindexes
+                    "path": "embeddings",  # Feldname, in dem die Embedding-Vektoren gespeichert sind
+                    "queryVector": vector,  # Ihr 384-dimensionaler Vektor
+                    "numCandidates": k * 2,  # Anzahl der Kandidaten, die für die Suche berücksichtigt werden sollen, hier doppelt so viele wie k, um die Genauigkeit zu erhöhen
+                    "limit": k,  # Anzahl der zurückzugebenden nächsten Nachbarn
+                    "filter": {}  # Optional, falls Sie die Ergebnisse basierend auf bestimmten Kriterien filtern möchten
                 }
-            },
-            {"$limit": k},  # Begrenzt die Ergebnisse auf die Top-5
-            {"$project": {"_id": 0, "document": "$$ROOT", "score": 1}}  # Passt die zurückgegebenen Felder an
+            }
         ]
 
         results = list(self.collection.aggregate(pipeline))
         return results
-

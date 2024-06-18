@@ -7,18 +7,20 @@ class EmbeddingAgent:
     def __init__(
             self,
             documents: list,
-            use_full_text: bool = False,
+            mode: str = "full_text",
             model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
             ):
         self.documents = documents
         self.model_name = model_name
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModel.from_pretrained(model_name)
-        if use_full_text:
+        if mode == "full_text":
             self.chunks = self.use_full_text()
-        else:
+        elif mode == "chunks":
             self.chunks = self.split_text()
-        self.document_embeddings = {}
+        elif mode == "user_query":
+            self.chunks = documents
+        self.document_embeddings = {}   # Enthält die Embeddings der chunks bzw documents
 
     def use_full_text(self) -> list:
         chunks = []
@@ -70,7 +72,7 @@ class EmbeddingAgent:
                     "document_name": chunk["document_name"],
                     "embeddings": []
                 }
-            self.document_embeddings[chunk["document_id"]]["embeddings"].append(embedding_list)
+            self.document_embeddings[chunk["document_id"]]["embeddings"] = embedding_list # war vorher append
 
 
     def _remove_unknown_words(self, text):
