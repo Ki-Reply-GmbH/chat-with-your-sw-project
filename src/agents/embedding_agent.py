@@ -59,7 +59,15 @@ class OpenAIEmbeddingAgent:
                     }
                 )
         return chunks
-    
+
+    def get_chunk_by_name(self, document_name: str):
+        # Durchsuchen der Chunks nach dem gegebenen Dokumentennamen
+        for chunk in self.chunks:
+            if chunk["document_name"] == document_name:
+                return chunk
+        # Wenn kein entsprechender Chunk gefunden wurde, Rückgabe von None
+        return None
+
     def get_embedding(self, text: str):
         text = text.replace("\n", " ")
         return self.client.embeddings.create(
@@ -76,16 +84,16 @@ class OpenAIEmbeddingAgent:
                 "embeddings": embedding
             }
 
-    def load_from_csv(self, filename="document_embeddings.csv"):
+    def load_from_csv(self, file_path="document_embeddings.csv"):
         # Lesen der CSV-Datei in einen DataFrame
-        self.df = pd.read_csv(filename)
+        self.df = pd.read_csv(file_path)
         
         # Konvertieren der Embeddings von Strings zurück in Listen von Floats
-        self.df['Embeddings'] = self.df['Embeddings'].apply(lambda x: [float(num) for num in x.split(",")])
+        self.df["Embeddings"] = self.df["Embeddings"].apply(lambda x: [float(num) for num in x.split(",")])
         
         return self.df
     
-    def write_to_csv(self, filename="document_embeddings.csv"):
+    def write_to_csv(self, file_path="document_embeddings.csv"):
         df_data = []
         for key, values in self.document_embeddings.items():
             # Konvertieren der Embeddings-Liste in einen String mit kommagetrennten Werten
@@ -94,20 +102,23 @@ class OpenAIEmbeddingAgent:
             df_data.append([embeddings_str, values["document_name"], values["document_id"]])
         
         self.df = pd.DataFrame(df_data, columns=["Embeddings", "Document Name", "Document ID"])
-        self.df.to_csv(filename, index=False)
+        self.df.to_csv(file_path, index=False)
 
     def similarity_search(self, text_input, top_n=5):
         # Embedding für den Text-Input erhalten
-        text_embedding = np.array(self.get_embedding(text_input)).reshape(1, -1) # cosine_similarity erwartet 2d array
+        text_embedding = np.array(self.get_embedding(text_input)).reshape(1, -1)  # cosine_similarity erwartet 2d array
         
-        # Berechnen der Kosinusähnlichkeit zwischen dem Text-Input und allen Embeddings im DataFrame
-        self.df['Similarity'] = self.df['Embeddings'].apply(
+        # Erstellen einer Kopie von self.df, um Original-DataFrame nicht zu verändern
+        df_copy = self.df.copy()
+        
+        # Berechnen der Kosinusähnlichkeit zwischen dem Text-Input und allen Embeddings im kopierten DataFrame
+        df_copy["Similarity"] = df_copy["Embeddings"].apply(
             lambda x: cosine_similarity(
                 np.array([float(num) for num in x.split(",")]).reshape(1, -1),
                 text_embedding
             )[0][0])
         
         # Sortieren der Ergebnisse nach Ähnlichkeit und Auswahl der Top-N-Ergebnisse
-        top_results = self.df.sort_values(by='Similarity', ascending=False).head(top_n)
+        top_results = df_copy.sort_values(by="Similarity", ascending=False).head(top_n)
         
         return top_results

@@ -9,7 +9,7 @@ from src.utils.directory_loader import DirectoryLoader
 from src.utils.vector_db import VectorDB, MongoDBAtlasVectorDB
 from src.agents.docstring_agent import DocstringAgent
 from src.agents.chat_agent import ChatAgent
-from src.agents.embedding_agent import EmbeddingAgent, OpenAIEmbeddingAgent
+from src.agents.embedding_agent import OpenAIEmbeddingAgent
 from src.config import load_config
 from src.models import LLModel
 from pymongo.mongo_client import MongoClient
@@ -58,7 +58,7 @@ def main():
     emb_agent = OpenAIEmbeddingAgent(documents, mode="chunks")
     emb_agent.make_embeddings()
     emb_agent.write_to_csv()
-    
+
     print("----- Similarity Search -----")
     while True:
         user_input = input("Geben Sie Ihre Anfrage ein (oder 'x' zum Beenden): ")
@@ -71,5 +71,9 @@ def main():
         #emb_agent.write_to_csv("document_embeddings_sim.csv")
         pprint(result)
 
+def main_chat():
+    config = load_config()
+    chat_agent = ChatAgent("document_embeddings.csv", config.prompts, LLModel(config))
+
 if __name__ == "__main__":
-    main()
+    main_chat()
