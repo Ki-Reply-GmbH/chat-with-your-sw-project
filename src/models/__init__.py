@@ -50,7 +50,7 @@ class LLModel:
         messages = [
             {
                 "role": "system",
-                "content": "You are a system designed to document and summarize Python source code.",
+                "content": "You are a system designed to answer questions about a specific software project.",
             },
             {"role": "user", "content": prompt},
         ]

@@ -31,8 +31,8 @@ class OpenAIEmbeddingAgent:
         for doc in self.documents:
             chunks.append(
                 {
-                    "document_id": doc.metadata["source"],
-                    "document_name": os.path.basename(doc.metadata["source"]),
+                    "document_path": doc.metadata["source"],
+                    "chunk_id": os.path.basename(doc.metadata["source"]),
                     "text": doc.page_content.replace("\n", " ")
                 }
             )
@@ -51,8 +51,8 @@ class OpenAIEmbeddingAgent:
                 print("Chunk", i, "created")
                 chunks.append(
                     {
-                        "document_id": doc.metadata["source"],
-                        "document_name": os.path.basename(
+                        "document_path": doc.metadata["source"],
+                        "chunk_id": os.path.basename(
                             "".join([doc.metadata["source"], "_chunk", str(i)])
                             ),
                         "text": chunk.replace("\n", " ")
@@ -60,10 +60,10 @@ class OpenAIEmbeddingAgent:
                 )
         return chunks
 
-    def get_chunk_by_name(self, document_name: str):
+    def get_chunk_by_name(self, document_path: str):
         # Durchsuchen der Chunks nach dem gegebenen Dokumentennamen
         for chunk in self.chunks:
-            if chunk["document_name"] == document_name:
+            if chunk["document_path"] == document_path:
                 return chunk
         # Wenn kein entsprechender Chunk gefunden wurde, Rückgabe von None
         return None
@@ -78,9 +78,9 @@ class OpenAIEmbeddingAgent:
     def make_embeddings(self):
         for chunk in self.chunks:
             embedding = self.get_embedding(chunk["text"])
-            self.document_embeddings[chunk["document_id"]] = {
-                "document_id": chunk["document_id"],
-                "document_name": chunk["document_name"],
+            self.document_embeddings[chunk["chunk_id"]] = {
+                "chunk_id": chunk["chunk_id"],
+                "document_path": chunk["document_path"],
                 "embeddings": embedding
             }
 
@@ -99,9 +99,9 @@ class OpenAIEmbeddingAgent:
             # Konvertieren der Embeddings-Liste in einen String mit kommagetrennten Werten
             embeddings_str = ",".join(map(str, values["embeddings"]))
             # Hinzufügen der Zeile (Embeddings, Document Name, Document ID) zur Liste
-            df_data.append([embeddings_str, values["document_name"], values["document_id"]])
+            df_data.append([embeddings_str, values["document_path"], values["chunk_id"]])
         
-        self.df = pd.DataFrame(df_data, columns=["Embeddings", "Document Name", "Document ID"])
+        self.df = pd.DataFrame(df_data, columns=["Embeddings", "Chunk ID", "Document Path"])
         self.df.to_csv(file_path, index=False)
 
     def similarity_search(self, text_input, top_n=5):

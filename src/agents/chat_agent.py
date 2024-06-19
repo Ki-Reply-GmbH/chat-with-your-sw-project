@@ -24,4 +24,13 @@ class ChatAgent:
                 print("Exiting...")
                 break
             # TODO ...
-            self.embedding_agent.similarity_search(user_input)
+            top_results = self.embedding_agent.similarity_search(user_input)
+    
+    def call_gpt(self, document_path, chunk):
+        prompt = self._prompts.get_chat_with_your_sw_project_prompt()
+        return self.model._get_llm_completion(
+            prompt.format(
+                document_path=document_path,
+                chunk=chunk
+            )
+        ).join(["\n\n", "Source: ", document_path])

@@ -60,20 +60,8 @@ def main():
     emb_agent.write_to_csv()
 
     print("----- Similarity Search -----")
-    while True:
-        user_input = input("Geben Sie Ihre Anfrage ein (oder 'x' zum Beenden): ")
-        if user_input == 'x':
-            print("Beenden...")
-            break
-
-        # Verwenden Sie den Benutzerinput für die similarity_search
-        result = emb_agent.similarity_search(user_input, 5)
-        #emb_agent.write_to_csv("document_embeddings_sim.csv")
-        pprint(result)
-
-def main_chat():
-    config = load_config()
-    chat_agent = ChatAgent("document_embeddings.csv", config.prompts, LLModel(config))
+    chat_agent = ChatAgent(emb_agent, config.prompts, LLModel(config))
+    chat_agent.chat()
 
 if __name__ == "__main__":
-    main_chat()
+    main()
