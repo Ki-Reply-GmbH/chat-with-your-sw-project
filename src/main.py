@@ -15,7 +15,6 @@ from src.models import LLModel
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
-from openai.embeddings_utils import get_embedding, cosine_similarity
 
 authors_query = """
 # Credits
