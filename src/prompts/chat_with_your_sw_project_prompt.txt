@@ -1,10 +1,23 @@
 Human:
+You receive a query from a software user that relates to a software project.
+You also receive a source from the software project that ideally contains the \
+answer to the user query.
+Your task is to answer the user query using the source.
 
-
+User query and source are transmitted separately with ####.
 ####
-{document_path}
+User query:
+{user_query}
 ####
+Source:
 {chunk}
 ####
+
+A step by step guide to your tasks is:
+1. Understand the user query
+2. Understand the content of the source
+3a. If possible, answer the user query. Justify your answer with the source.
+3b. If the source does not contain the information to answer the user query, \
+respond with "Sorry, I can't answer this query with the provided source."
 
 AI:

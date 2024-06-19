@@ -25,12 +25,16 @@ class ChatAgent:
                 break
             # TODO ...
             top_results = self.embedding_agent.similarity_search(user_input)
+            document_path = top_results.iloc[0]["Document Path"]
+            chunk = top_results.iloc[0]["Chunk ID"]
+            response = self.call_gpt(document_path, chunk)
+            print(response)
     
-    def call_gpt(self, document_path, chunk):
+    def call_gpt(self, user_query, document_path, chunk):
         prompt = self._prompts.get_chat_with_your_sw_project_prompt()
         return self.model._get_llm_completion(
             prompt.format(
-                document_path=document_path,
+                user_query=user_query,
                 chunk=chunk
             )
-        ).join(["\n\n", "Source: ", document_path])
+        ).join(["\n\n", "Source: ", document_path, "\n", "Chunk: ", chunk, "\n\n"])
