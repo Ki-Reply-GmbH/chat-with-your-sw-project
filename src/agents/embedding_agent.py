@@ -88,15 +88,9 @@ class OpenAIEmbeddingAgent:
     def load_from_csv(self, file_paths=["document_embeddings.csv", "chunks.csv"]):
         # Laden der Embeddings aus einer CSV-Datei
         self.df = pd.read_csv(file_paths[0])
-        #self.df["Embeddings"] = self.df["Embeddings"].apply(lambda x: [float(num) for num in x.split(",")])
 
         # Laden der Chunks aus einer CSV-Datei
         chunks_df = pd.read_csv(file_paths[1])
-        #print("--------------------------")
-        #print("Chunks:\n", chunks_df.head())
-        #print("Chunks:\n", chunks_df.columns)
-        #print("chunks_df.iterrows():\n", chunks_df.iterrows())
-        #print("--------------------------")
         self.chunks = [
             {
                 "document_path": row["document_path"],
