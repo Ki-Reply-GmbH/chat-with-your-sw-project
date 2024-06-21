@@ -10,8 +10,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 class OpenAIEmbeddingAgent:
     def __init__(
             self,
-            documents: list,
-            mode: str = "full_text",
+            documents: list = None,
+            mode: str = None,
             model: str = "text-embedding-3-large"
             ):
         self.client = OpenAI()
@@ -23,6 +23,8 @@ class OpenAIEmbeddingAgent:
             self.chunks = self.split_text()
         elif mode == "user_query":
             self.chunks = documents
+        else:
+            self.chunks = None
         self.document_embeddings = {}
         self.df = None
 
@@ -83,25 +85,42 @@ class OpenAIEmbeddingAgent:
                 "embeddings": embedding
             }
 
-    def load_from_csv(self, file_path="document_embeddings.csv"):
-        # Lesen der CSV-Datei in einen DataFrame
-        self.df = pd.read_csv(file_path)
-        
-        # Konvertieren der Embeddings von Strings zurück in Listen von Floats
-        self.df["Embeddings"] = self.df["Embeddings"].apply(lambda x: [float(num) for num in x.split(",")])
-        
-        return self.df
-    
-    def write_to_csv(self, file_path="document_embeddings.csv"):
+    def load_from_csv(self, file_paths=["document_embeddings.csv", "chunks.csv"]):
+        # Laden der Embeddings aus einer CSV-Datei
+        self.df = pd.read_csv(file_paths[0])
+        #self.df["Embeddings"] = self.df["Embeddings"].apply(lambda x: [float(num) for num in x.split(",")])
+
+        # Laden der Chunks aus einer CSV-Datei
+        chunks_df = pd.read_csv(file_paths[1])
+        #print("--------------------------")
+        #print("Chunks:\n", chunks_df.head())
+        #print("Chunks:\n", chunks_df.columns)
+        #print("chunks_df.iterrows():\n", chunks_df.iterrows())
+        #print("--------------------------")
+        self.chunks = [
+            {
+                "document_path": row["document_path"],
+                "chunk_id": row["chunk_id"],
+                "text": row["text"]
+            }
+            for _, row in chunks_df.iterrows()
+        ]
+            
+    def write_to_csv(self, file_paths=["document_embeddings.csv", "chunks.csv"]):
+        # Schreiben der Embeddings in eine CSV-Datei
         df_data = []
-        for key, values in self.document_embeddings.items():
+        for _, values in self.document_embeddings.items():
             # Konvertieren der Embeddings-Liste in einen String mit kommagetrennten Werten
             embeddings_str = ",".join(map(str, values["embeddings"]))
             # Hinzufügen der Zeile (Embeddings, Document Name, Document ID) zur Liste
             df_data.append([embeddings_str, values["document_path"], values["chunk_id"]])
         
         self.df = pd.DataFrame(df_data, columns=["Embeddings", "Document Path", "Chunk ID"])
-        self.df.to_csv(file_path, index=False)
+        self.df.to_csv(file_paths[0], index=False)
+
+        # Schreiben der Chunks in eine CSV-Datei
+        chunks_df = pd.DataFrame(self.chunks)
+        chunks_df.to_csv(file_paths[1], index=False)
 
     def similarity_search(self, text_input, top_n=5):
         # Embedding für den Text-Input erhalten
