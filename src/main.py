@@ -38,6 +38,13 @@ def main():
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf8")
 
     config = load_config()
+    
+    # Check if the files exist
+    chunks_path = os.path.join("src", "models", "chunks.csv")
+    embeddings_path = os.path.join("src", "models", "document_embeddings.csv")
+    if not os.path.exists(chunks_path) or not os.path.exists(embeddings_path):
+        LOGGER.info("Required files not found. Starting training...")
+        train()
 
     emb_agent = OpenAIEmbeddingAgent()
     emb_agent.load_from_csv()

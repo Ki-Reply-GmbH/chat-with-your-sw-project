@@ -85,7 +85,7 @@ class OpenAIEmbeddingAgent:
                 "embeddings": embedding
             }
 
-    def load_from_csv(self, file_paths=["document_embeddings.csv", "chunks.csv"]):
+    def load_from_csv(self, file_paths=["src/models/document_embeddings.csv", "src/models/chunks.csv"]):
         # Laden der Embeddings aus einer CSV-Datei
         self.df = pd.read_csv(file_paths[0])
 
@@ -100,7 +100,7 @@ class OpenAIEmbeddingAgent:
             for _, row in chunks_df.iterrows()
         ]
             
-    def write_to_csv(self, file_paths=["document_embeddings.csv", "chunks.csv"]):
+    def write_to_csv(self, file_paths=["src/models/document_embeddings.csv", "src/models/chunks.csv"]):
         # Schreiben der Embeddings in eine CSV-Datei
         df_data = []
         for _, values in self.document_embeddings.items():
