@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 LOGGER = logging.getLogger(__name__)
-logging.basicConfig(level=os.environ.get("LOG_LEVEL", "DEBUG"))
+logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
 
 
 @dataclass

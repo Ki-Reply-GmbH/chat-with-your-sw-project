@@ -45,10 +45,8 @@ class OpenAIEmbeddingAgent:
         )
         chunks = []
         for doc in self.documents:
-            print("Creating chunks for document:", doc.metadata["source"])
             doc_chunks = splitter.split_text(doc.page_content)
             for i, chunk in enumerate(doc_chunks):
-                print("Chunk", i, "created")
                 chunks.append(
                     {
                         "document_path": doc.metadata["source"],
@@ -60,10 +58,11 @@ class OpenAIEmbeddingAgent:
                 )
         return chunks
 
-    def get_chunk_by_name(self, document_path: str):
+    def get_chunk(self, document_path: str, chunk_id: str):
         # Durchsuchen der Chunks nach dem gegebenen Dokumentennamen
         for chunk in self.chunks:
-            if chunk["document_path"] == document_path:
+            if chunk["document_path"] == document_path \
+                and chunk["chunk_id"] == chunk_id:
                 return chunk
         # Wenn kein entsprechender Chunk gefunden wurde, Rückgabe von None
         return None
@@ -101,7 +100,7 @@ class OpenAIEmbeddingAgent:
             # Hinzufügen der Zeile (Embeddings, Document Name, Document ID) zur Liste
             df_data.append([embeddings_str, values["document_path"], values["chunk_id"]])
         
-        self.df = pd.DataFrame(df_data, columns=["Embeddings", "Chunk ID", "Document Path"])
+        self.df = pd.DataFrame(df_data, columns=["Embeddings", "Document Path", "Chunk ID"])
         self.df.to_csv(file_path, index=False)
 
     def similarity_search(self, text_input, top_n=5):

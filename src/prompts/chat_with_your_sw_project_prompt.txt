@@ -4,10 +4,13 @@ You also receive a source from the software project that ideally contains the \
 answer to the user query.
 Your task is to answer the user query using the source.
 
-User query and source are transmitted separately with ####.
+User query, source name and source are transmitted separately with ####.
 ####
 User query:
 {user_query}
+####
+Source name:
+{source_name}
 ####
 Source:
 {chunk}
