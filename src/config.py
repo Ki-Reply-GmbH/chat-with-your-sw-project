@@ -45,46 +45,6 @@ class PromptConfig:
             )
         return self._read_file_content(prompt_path)
 
-    def get_document_module_prompt(self) -> str:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        prompt_path = os.path.join(
-            base_dir, "prompts",
-            "document_module_prompt.txt"
-            )
-        return self._read_file_content(prompt_path)
-
-    def get_document_class_prompt(self) -> str:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        prompt_path = os.path.join(
-            base_dir, "prompts",
-            "document_class_prompt.txt"
-            )
-        return self._read_file_content(prompt_path)
-
-    def get_document_method_prompt(self) -> str:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        prompt_path = os.path.join(
-            base_dir, "prompts",
-            "document_method_prompt.txt"
-            )
-        return self._read_file_content(prompt_path)
-
-    def get_exract_methods_prompt(self) -> str:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        prompt_path = os.path.join(
-            base_dir, "prompts",
-            "extract_methods_prompt.txt"
-            )
-        return self._read_file_content(prompt_path)
-
-    def get_exract_classes_prompt(self) -> str:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        prompt_path = os.path.join(
-            base_dir, "prompts",
-            "extract_classes_prompt.txt"
-            )
-        return self._read_file_content(prompt_path)
-
 
 @dataclass
 class Config:
@@ -98,9 +58,6 @@ class Config:
         OPENAI_API_KEY (str): The API key for OpenAI.
         LLM_MODEL_NAME (str): The name of the language model to use.
         LLM_TEMPERATURE (float): The temperature setting for the language model.
-        GITHUB_TOKEN (str): The access token for GitHub.
-        GIT_USER (str): The username for GitHub.
-        GIT_EMAIL (str): The email for GitHub.
         REPO_OWNER (str): The owner of the repository.
         REPO_NAME (str): The name of the repository.
         MAIN_BRANCH (str): The main branch of the repository.
@@ -163,8 +120,6 @@ class Config:
         if cls._instance is None:
             logging.info("Creating new Config instance")
             cls._instance = Config()
-            # cls._instance.validate_github_user()
-            # cls._instance.validate_llm_setup()
             # Put any initialization here.
         return cls._instance
 

@@ -22,12 +22,6 @@ def train():
     dir_loader = DirectoryLoader(directory="./resources/cookiecutter")
     documents = dir_loader.load()
 
-    py_file_paths = []
-    for document in documents:
-        print(document.metadata["source"])
-        if document.metadata["source"].endswith(".py"):
-            py_file_paths.append(document.metadata["source"])
-
     LOGGER.info("Creating the embeddings (this takes some time)...")
     emb_agent = OpenAIEmbeddingAgent(documents, mode="chunks")
     emb_agent.make_embeddings()

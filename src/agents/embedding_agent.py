@@ -69,7 +69,7 @@ class OpenAIEmbeddingAgent:
         # Wenn kein entsprechender Chunk gefunden wurde, Rückgabe von None
         return None
 
-    def get_embedding(self, text: str):
+    def make_embedding(self, text: str):
         text = text.replace("\n", " ")
         return self.client.embeddings.create(
             input = [text],
@@ -78,7 +78,7 @@ class OpenAIEmbeddingAgent:
     
     def make_embeddings(self):
         for chunk in self.chunks:
-            embedding = self.get_embedding(chunk["text"])
+            embedding = self.make_embedding(chunk["text"])
             self.document_embeddings[chunk["chunk_id"]] = {
                 "chunk_id": chunk["chunk_id"],
                 "document_path": chunk["document_path"],

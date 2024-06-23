@@ -1,3 +1,7 @@
+"""
+Note: This is currently dead code, as we are using a pandas dataframe for our 
+document embeddings. This code is kept for reference and potential future use.
+"""
 import certifi
 import os
 from pymongo import MongoClient

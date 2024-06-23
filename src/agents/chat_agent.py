@@ -24,7 +24,6 @@ class ChatAgent:
             if user_input == 'x':
                 print("Exiting...")
                 break
-            # TODO ...
             top_results = self.embedding_agent.similarity_search(user_input)
             chunk_id = top_results.iloc[0]["Chunk ID"]
             document_path = top_results.iloc[0]["Document Path"]
