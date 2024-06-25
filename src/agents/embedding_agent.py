@@ -118,7 +118,7 @@ class OpenAIEmbeddingAgent:
 
     def similarity_search(self, text_input, top_n=5):
         # Embedding für den Text-Input erhalten
-        text_embedding = np.array(self.get_embedding(text_input)).reshape(1, -1)  # cosine_similarity erwartet 2d array
+        text_embedding = np.array(self.make_embedding(text_input)).reshape(1, -1)  # cosine_similarity erwartet 2d array
         
         # Erstellen einer Kopie von self.df, um Original-DataFrame nicht zu verändern
         df_copy = self.df.copy()
