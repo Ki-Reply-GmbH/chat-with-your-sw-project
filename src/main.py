@@ -7,7 +7,6 @@ from src.utils.git_handler import GitHandler
 from src.utils.cache import DisabledCache, SimpleCache
 from src.utils.directory_loader import DirectoryLoader
 from src.utils.vector_db import VectorDB, MongoDBAtlasVectorDB
-from src.agents.docstring_agent import DocstringAgent
 from src.agents.chat_agent import ChatAgent
 from src.agents.embedding_agent import OpenAIEmbeddingAgent
 from src.config import load_config, LOGGER
